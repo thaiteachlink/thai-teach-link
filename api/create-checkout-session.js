@@ -18,7 +18,7 @@ const supabase = createClient(
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
 
-const STANDARD_LISTING_PRICE_THB = 1900;
+const STANDARD_LISTING_PRICE_THB = 100;
 const FEATURED_ADDON_PRICE_THB = 1200;
 
 export default async function handler(req, res) {
