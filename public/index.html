@@ -82,6 +82,11 @@
     padding:76px 0 56px;
     border-bottom:1px solid var(--jade-line);
     position:relative; overflow:hidden;
+    background-image:
+      linear-gradient(100deg, rgba(22,51,44,0.96) 0%, rgba(22,51,44,0.90) 38%, rgba(22,51,44,0.62) 100%),
+      url('/images/hero-chalkboard.jpg');
+    background-size:cover;
+    background-position:center 30%;
   }
   .hero-grid{display:grid; grid-template-columns: 1.3fr 1fr; gap:48px; align-items:end;}
   @media (max-width:820px){ .hero-grid{grid-template-columns:1fr;} }
@@ -175,6 +180,14 @@
 
   /* ---------- Resources ---------- */
   .resource-list{display:flex; flex-direction:column; border-top:1px solid var(--jade-line);}
+  .resources-grid{display:grid; grid-template-columns: 0.85fr 1.4fr; gap:40px; align-items:start;}
+  @media (max-width:820px){ .resources-grid{grid-template-columns:1fr;} }
+  .resource-image{
+    border-radius:var(--radius); overflow:hidden; border:1px solid var(--jade-line);
+    position:sticky; top:96px;
+  }
+  .resource-image img{display:block; width:100%; height:auto;}
+  @media (max-width:820px){ .resource-image{position:static;} }
   .resource-row{
     padding:22px 0; border-bottom:1px solid var(--jade-line);
     display:grid; grid-template-columns: 120px 1fr; gap:22px;
@@ -406,7 +419,11 @@
           <p>The practical stuff schools assume you already know.</p>
         </div>
       </div>
-      <div class="resource-list">
+      <div class="resources-grid">
+        <div class="resource-image">
+          <img src="/images/guides-accent.jpg" alt="Books, an apple, and ABC blocks on a desk" loading="lazy" width="900" height="675">
+        </div>
+        <div class="resource-list">
         <div class="resource-row">
           <div class="resource-cat">Paperwork</div>
           <div>
@@ -434,6 +451,7 @@
             <h4>Your first two weeks: bank account, SIM card, housing</h4>
             <p>The order to do things in so you're not stuck without a phone plan or a place to sign a lease.</p>
           </div>
+        </div>
         </div>
       </div>
     </div>
