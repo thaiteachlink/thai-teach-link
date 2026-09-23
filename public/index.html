@@ -214,6 +214,24 @@
   }
   .modal h4{font-family:var(--serif); font-size:22px; margin:0 0 12px; font-weight:500;}
   .modal p{color:var(--ivory-dim); font-size:14.5px; margin:0 0 22px;}
+
+  /* ---------- Job detail modal ---------- */
+  .modal-wide{max-width:600px; text-align:left; padding:36px;}
+  .modal-wide .job-detail-title{font-family:var(--serif); font-size:26px; margin:0 0 6px; font-weight:500;}
+  .modal-wide .job-detail-school{color:var(--marigold); font-size:15px; margin:0 0 18px;}
+  .modal-wide .job-detail-meta{display:flex; flex-wrap:wrap; gap:10px; margin-bottom:20px;}
+  .modal-wide .job-detail-meta span{
+    background:rgba(245,241,227,0.06); border:1px solid var(--jade-line); border-radius:999px;
+    padding:6px 14px; font-size:13px; color:var(--ivory-dim);
+  }
+  .modal-wide .job-detail-desc{color:var(--ivory-dim); font-size:14.5px; line-height:1.7; margin:0 0 26px; white-space:pre-wrap;}
+  .modal-wide .job-detail-actions{display:flex; gap:10px; flex-wrap:wrap;}
+  .modal-close-x{
+    position:absolute; top:18px; right:18px; background:none; border:none; color:var(--ivory-dim);
+    font-size:22px; cursor:pointer; line-height:1; padding:4px 8px;
+  }
+  .modal-close-x:hover{color:var(--ivory);}
+  #jobDetailBackdrop .modal{position:relative;}
 </style>
 </head>
 <body>
@@ -239,7 +257,7 @@
           A job board for teaching in Thailand
         </div>
         <h1>Find work at a school that actually wants <em>you</em> there.</h1>
-        <p class="hero-sub">Verified listings from international schools, language centers, and government programs across Bangkok, Chiang Mai, and the islands — with salary, visa, and qualification details up front.</p>
+        <p class="hero-sub">Listings from international schools, language centers, and government programs across Bangkok, Chiang Mai, and the islands — with salary, visa, and qualification details up front.</p>
         <div class="hero-actions">
           <a href="#listings" class="btn btn-solid">Browse open positions</a>
           <a href="#post" class="btn btn-line">Hiring? Post a job</a>
@@ -308,9 +326,9 @@
           <p class="desc">Your posting appears in the main board for 30 days, searchable by location, subject, and visa sponsorship.</p>
           <div class="price-line"><b>฿1,900</b><span>/ 30-day listing</span></div>
           <ul class="plan-list">
-            <li>Live for 30 days, editable anytime</li>
+            <li>Live for 30 days from approval</li>
             <li>Appears in location &amp; subject filters</li>
-            <li>Included in the weekly jobseeker email</li>
+            <li>Searchable by jobseekers browsing the board</li>
             <li>Featured placement: +฿1,200</li>
           </ul>
           <p class="form-note">You'll be redirected to Stripe to pay securely. Your listing goes live automatically as soon as payment is confirmed.</p>
@@ -422,7 +440,6 @@
         <h5>Jobseekers</h5>
         <a href="#listings">Browse listings</a>
         <a href="#resources">Guides</a>
-        <a href="#">Weekly job email</a>
       </div>
       <div>
         <h5>Employers</h5>
@@ -432,8 +449,7 @@
       </div>
     </div>
     <div class="foot-bottom">
-      <span>© 2026 Thai Teach Link. Demo site.</span>
-      <span>Listings shown are sample data for demonstration.</span>
+      <span>© 2026 Thai Teach Link. All rights reserved.</span>
     </div>
   </div>
 </footer>
@@ -441,15 +457,29 @@
 <div class="modal-backdrop" id="modalBackdrop">
   <div class="modal">
     <h4>Listing published</h4>
-    <p>Your posting is now live in the board below. In a real launch this is the moment payment would be collected and the listing saved to a shared database.</p>
+    <p>Your listing will appear below once payment is confirmed.</p>
     <button class="btn btn-solid" id="modalClose">Got it</button>
+  </div>
+</div>
+
+<div class="modal-backdrop" id="jobDetailBackdrop">
+  <div class="modal modal-wide">
+    <button class="modal-close-x" id="jobDetailClose" aria-label="Close">&times;</button>
+    <div class="job-detail-title" id="jdTitle"></div>
+    <div class="job-detail-school" id="jdSchool"></div>
+    <div class="job-detail-meta" id="jdMeta"></div>
+    <p class="job-detail-desc" id="jdDesc"></p>
+    <div class="job-detail-actions">
+      <a href="#" id="jdApply" class="btn btn-solid">Apply by email</a>
+      <button class="btn btn-line" id="jdCopyLink">Copy link to this job</button>
+    </div>
   </div>
 </div>
 
 <script>
 (function(){
   // ---- Fill these in from your Supabase project (Settings > API) ----
-  const SUPABASE_URL = 'https://ldkstmphtdfxpodywlyu.supabase.co';
+  const SUPABASE_URL = 'https://ldkstmphtdfxpodywlyu.supabase.co/rest/v1/';
   const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imxka3N0bXBodGRmeHBvZHl3bHl1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTAwMzk5NjMsImV4cCI6MjEwNTYxNTk2M30.dE4j1GXsVSaC-fefH-8_eHov1MMns4d8ruefFF-88sI';
   // ---------------------------------------------------------------------
 
@@ -519,8 +549,9 @@
         </div>
         <div class="job-tag">${j.visa_sponsorship === 'yes' ? 'Sponsors visa' : 'No sponsorship'}</div>
         <div class="job-salary">฿${escapeHtml(j.salary)}</div>
-        <a href="mailto:${escapeHtml(j.contact_email)}" class="btn btn-line">View &amp; apply</a>
+        <button type="button" class="btn btn-line" data-job-id="${j.id}">View &amp; apply</button>
       `;
+      row.querySelector('[data-job-id]').addEventListener('click', () => openJobDetail(j.id));
       listingsContainer.appendChild(row);
     });
 
@@ -532,6 +563,66 @@
   function escapeHtml(s){
     return String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
   }
+
+  // ---------- Job detail modal ----------
+  const jobDetailBackdrop = document.getElementById('jobDetailBackdrop');
+
+  function openJobDetail(jobId){
+    const j = jobs.find(x => x.id === jobId);
+    if(!j){
+      document.getElementById('jdTitle').textContent = 'Listing no longer available';
+      document.getElementById('jdSchool').textContent = '';
+      document.getElementById('jdMeta').innerHTML = '';
+      document.getElementById('jdDesc').textContent = 'This position has expired or been removed. Browse current openings below.';
+      document.getElementById('jdApply').style.display = 'none';
+      document.getElementById('jdCopyLink').style.display = 'none';
+      jobDetailBackdrop.classList.add('show');
+      return;
+    }
+    document.getElementById('jdApply').style.display = '';
+    document.getElementById('jdCopyLink').style.display = '';
+    document.getElementById('jdTitle').textContent = j.title;
+    document.getElementById('jdSchool').textContent = j.school;
+
+    const meta = [
+      j.city,
+      j.school_type,
+      `฿${j.salary}`,
+      j.visa_sponsorship === 'yes' ? 'Sponsors visa' : 'No visa sponsorship'
+    ];
+    document.getElementById('jdMeta').innerHTML = meta.map(m => `<span>${escapeHtml(m)}</span>`).join('');
+    document.getElementById('jdDesc').textContent = j.description || 'No further details provided — contact the school directly for the full job description.';
+
+    const applyBtn = document.getElementById('jdApply');
+    applyBtn.href = `mailto:${j.contact_email}?subject=${encodeURIComponent('Application: ' + j.title + ' at ' + j.school)}`;
+
+    jobDetailBackdrop.classList.add('show');
+    history.pushState({ jobId }, '', `${window.location.pathname}?job=${jobId}`);
+  }
+
+  function closeJobDetail(){
+    jobDetailBackdrop.classList.remove('show');
+    if(new URLSearchParams(window.location.search).get('job')){
+      history.pushState(null, '', window.location.pathname);
+    }
+  }
+
+  document.getElementById('jobDetailClose').addEventListener('click', closeJobDetail);
+  jobDetailBackdrop.addEventListener('click', function(e){
+    if(e.target === this) closeJobDetail();
+  });
+  document.getElementById('jdCopyLink').addEventListener('click', function(){
+    navigator.clipboard.writeText(window.location.href).then(() => {
+      const btn = document.getElementById('jdCopyLink');
+      const original = btn.textContent;
+      btn.textContent = 'Link copied!';
+      setTimeout(() => { btn.textContent = original; }, 1800);
+    });
+  });
+  window.addEventListener('popstate', function(){
+    const jobId = new URLSearchParams(window.location.search).get('job');
+    if(jobId) openJobDetail(jobId); else jobDetailBackdrop.classList.remove('show');
+  });
 
   [searchInput].forEach(el => el.addEventListener('input', render));
   [locationFilter, typeFilter, visaFilter].forEach(el => el.addEventListener('change', render));
@@ -596,7 +687,14 @@
     document.getElementById('modalBackdrop').classList.add('show');
   }
 
-  loadJobs();
+  // If someone opened a shared job link (?job=uuid), show that job's detail
+  // once the jobs list has finished loading.
+  const sharedJobId = params.get('job');
+  if(sharedJobId){
+    loadJobs().then(() => openJobDetail(sharedJobId));
+  } else {
+    loadJobs();
+  }
 })();
 </script>
 
